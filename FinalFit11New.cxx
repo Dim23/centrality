@@ -6,12 +6,13 @@
 #include <fstream>
 #include <vector>
 #include <TMath.h>
-
 #include <TRatioPlot.h>
-using namespace std;
-//gROOT->ForceStyle();
-//gROOT->SetStyle("Pub");
 
+using namespace std;
+
+
+
+//gROOT->SetStyle(st1);
 
 //Задаем постоянные;
 double sigma=685,pi=TMath::Pi();
@@ -142,8 +143,13 @@ NEWfc=Gev->GetFunction("fc");
    GevC->SetStats(0);
    Gev->SetStats(0);      // No statistics on lower plot
   
-// Y axis ratio plot settings
     Gev->GetYaxis()->SetTitle("1/N dN_{ch}/dN");
+    Gev->GetXaxis()->SetRangeUser(0,Nn);
+    GevC->GetYaxis()->SetTitle("Fit/Data");
+    GevC->GetXaxis()->SetRangeUser(0,Nn);
+    GevC->GetXaxis()->SetTitle("N_{ch}");
+// Y axis ratio plot settings
+
     Gev->GetYaxis()->SetNdivisions(505);
     Gev->GetYaxis()->SetTitleSize(20);
     Gev->GetYaxis()->SetTitleFont(43);
@@ -151,7 +157,7 @@ NEWfc=Gev->GetFunction("fc");
     Gev->GetYaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
     Gev->GetYaxis()->SetLabelSize(15);
 // X axis ratio plot settings
-    Gev->GetXaxis()->SetRangeUser(0,Nn);
+    
     Gev->GetXaxis()->SetTitleSize(20);
     Gev->GetXaxis()->SetTitleFont(43);
     Gev->GetXaxis()->SetTitleOffset(1.5);
@@ -160,7 +166,7 @@ NEWfc=Gev->GetFunction("fc");
 
 
 // Y axis ratio plot settings
-    GevC->GetYaxis()->SetTitle("Fit/Data");
+    
     GevC->GetYaxis()->SetNdivisions(505);
     GevC->GetYaxis()->SetTitleSize(20);
     GevC->GetYaxis()->SetTitleFont(43);
@@ -168,8 +174,7 @@ NEWfc=Gev->GetFunction("fc");
     GevC->GetYaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
     GevC->GetYaxis()->SetLabelSize(15);
 // X axis ratio plot settings
-    GevC->GetXaxis()->SetRangeUser(0,Nn);
-    GevC->GetXaxis()->SetTitle("N_{ch}");
+
     GevC->GetXaxis()->SetTitleSize(20);
     GevC->GetXaxis()->SetTitleFont(43);
     GevC->GetXaxis()->SetTitleOffset(3);
@@ -179,6 +184,7 @@ NEWfc=Gev->GetFunction("fc");
     GevC->Draw();
 TLine *line=new TLine(0,1,Nn,1);
 line->Draw("SAME");
+
 
         };
 
@@ -199,14 +205,14 @@ line->Draw("SAME");
         double c(double n0,int M)
         {
             double I=0.0;
-            I=IntPn(n0,Nn,M);
+            I=IntPn(n0,Nn+1,M);
         return I;
         };
 
 //Метод для нахождения n по заданной центральности;
         double cFind(double c0,double n0) {
             double n=n0,cen=0,stepn=1,step=1;
-            int M=round((Nn-n0)/step);
+            int M=round((Nn-n0)/step+1);
             while (cen<c0)
             {
                 n=n-stepn; cen=c(n,M); 
@@ -288,17 +294,22 @@ void Plotbn(double n0,double nn,int M,double bn,int N)
             }
 
         d1=PlotIntb(n0,nn,M,bn,N);
-        TGraph* grb1=new TGraph(N,b.data(),d1.data());grb1->SetName("grBimp_1");
+        TGraph* grb1=new TGraph(N,b.data(),d1.data());grb1->SetTitle(" ");
 
         grb1->GetYaxis()->SetRangeUser(0,1);
         grb1->GetXaxis()->SetRangeUser(0,bn);
         
-        TCanvas *c3=new TCanvas("c3","Graph Draw Options",10,0,800,800);
+        TCanvas *c3=new TCanvas("c3","Graph Draw Options",10,0,500,400);
         c3->cd();
-        grb1->SetLineColor(1);grb1->Draw(); 
+        grb1->SetLineColor(1);
+        grb1->GetXaxis()->SetTitle("<b>");
+        grb1->GetYaxis()->SetTitle("P(b)");
+
+grb1->Draw(); 
 
         TH1F *hb=new TH1F("hb","impact",N,0,bn); 
         hb=Histb(n0,nn,bn,N);
+
         hb->Draw("SAME");
 
 }
@@ -327,7 +338,7 @@ return sqrt(mb/id);
  }
 
       
-void PlotAllb(int M,double bn,int N)
+void PlotAllb(int Mm,double bn,int N)
         {
          vector<double> b,Nc(11);
          vector<double> d[10];
@@ -349,7 +360,7 @@ void PlotAllb(int M,double bn,int N)
 
         for (int n=0;n<10;n++)
             {   
-                d[n]=PlotIntb(Nc[n+1],Nc[n],M,bn,N);
+                d[n]=PlotIntb(Nc[n+1],Nc[n],Mm,bn,N);
             }
     
     
@@ -379,7 +390,7 @@ gr->GetYaxis()->SetRangeUser(0,bn);
 gr->GetXaxis()->SetRangeUser(0,100);
 gr->SetLineColor(1);
 gr1->SetLineColor(2);
-gr->SetTitle(" Reconstructed ");
+gr->SetTitle(" ");
 gr1->SetTitle(" UrQMD ");
 gr->SetName("FitImpact");
 gr1->SetName("ModalImpact");
